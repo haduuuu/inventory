@@ -26,8 +26,7 @@ const Register = () => {
         setLoading(true)
         try {
             await register(email, password)
-            // Redirect to dashboard after successful registration
-            router.replace('/(dashboard)/dash')
+            router.replace('/')
         } catch (error) {
             setError(error.message || "Error registering user")
         } finally {

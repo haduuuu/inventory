@@ -6,6 +6,7 @@ export const UserContext = createContext();
 export function UserProvider({ children }) {
     const [user, setUser] = useState(null);
     const [authChecked, setAuthChecked] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     // Initial silent check on bootup
     useEffect(() => {
@@ -53,15 +54,18 @@ export function UserProvider({ children }) {
 
     async function logout() {
         try {
+            setLoading(true);
             await account.deleteSession("current");
             setUser(null);
         } catch (error) {
             console.error("Logout Error:", error.message);
+        } finally {
+            setLoading(false);
         }
     }
 
     return (
-        <UserContext.Provider value={{ user, authChecked, login, logout, register }}>
+        <UserContext.Provider value={{ user, authChecked, loading, login, logout, register }}>
             {children}
         </UserContext.Provider>
     );

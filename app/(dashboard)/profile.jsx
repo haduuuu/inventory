@@ -7,6 +7,7 @@ import { useColorScheme } from "react-native";
 import ThemedView from "../../components/ThemedView";
 import ThemedText from "../../components/ThemedText";
 import ThemedButton from "../../components/Themedbutton";
+import ThemedLoader from "../../components/ThemedLoader";
 import Spacer from "../../components/Spacer";
 
 const Profile = () => {
@@ -14,7 +15,7 @@ const Profile = () => {
 
     // 2. Pick dark pink for light mode, light pink for dark mode
     const dynamicPink = isDarkMode ? "#F48FB1" : "#C2185B";
-    const { logout, user } = useUser();
+    const { logout, user, loading } = useUser();
 
     const handleLogout = async () => {
         try {
@@ -107,11 +108,15 @@ const Profile = () => {
                 <Spacer height={35} />
 
                 {/* Action Logout Button */}
-                <ThemedButton onPress={handleLogout}>
-                    <View style={styles.logoutButtonContent}>
-                        <Ionicons name="log-out" size={20} color="#fff" />
-                        <ThemedText style={styles.logoutButtonText}>Logout</ThemedText>
-                    </View>
+                <ThemedButton onPress={handleLogout} disabled={loading}>
+                    {loading ? (
+                        <ThemedLoader />
+                    ) : (
+                        <View style={styles.logoutButtonContent}>
+                            <Ionicons name="log-out" size={20} color="#fff" />
+                            <ThemedText style={styles.logoutButtonText}>Logout</ThemedText>
+                        </View>
+                    )}
                 </ThemedButton>
 
                 <Spacer height={25} />

@@ -1,107 +1,157 @@
-import { StyleSheet, View, ScrollView, Pressable } from "react-native";
+import { StyleSheet, View, ScrollView, Pressable, Alert, useColorScheme, ActivityIndicator, Text } from "react-native";
+import { useState } from "react";
 import { useProducts } from "../../hooks/useProducts";
 import { useRouter } from "expo-router";
-
-// Custom Themed Components
+import { Ionicons } from "@expo/vector-icons";
 import ThemedView from "../../components/ThemedView";
 import Spacer from "../../components/Spacer";
 import ThemedText from "../../components/ThemedText";
-
-// Fallback styling colors (Matches your database schema usage)
-const colors = {
-    primary: "#007AFF",
-    danger: "#e74c3c",
-    cardBg: "#f9f9f9"
-};
+import { colors } from "../../constants/colors";
 
 const Products = () => {
-    const { products } = useProducts();
+    const { products, deleteProduct } = useProducts();
     const router = useRouter();
+    const colorScheme = useColorScheme();
+    const theme = colors[colorScheme] ?? colors.light;
+    const [deletingId, setDeletingId] = useState(null);
 
     const handleEdit = (productId) => {
-        // Navigate to your edit form route when pressed
-        router.push(`/(dashboard)/products/edit/${productId}`);
+        router.push(`/(dashboard)/edit?productId=${productId}`);
     };
 
-    const handleDelete = async (productId) => {
-        console.log("Delete product triggered for ID:", productId);
-        // Implement your hook's delete execution here if required
+    const performDelete = async (productId) => {
+        setDeletingId(productId);
+        try {
+            await deleteProduct(productId);
+        } catch (error) {
+            Alert.alert("Couldn't delete product", error.message || "Please try again.");
+        } finally {
+            setDeletingId(null);
+        }
+    };
+
+    const handleDelete = (productId, productName) => {
+        Alert.alert(
+            "Delete product",
+            `Are you sure you want to delete "${productName || "this product"}"?`,
+            [
+                { text: "Cancel", style: "cancel" },
+                { text: "Delete", style: "destructive", onPress: () => performDelete(productId) },
+            ]
+        );
     };
 
     return (
         <ThemedView style={styles.container}>
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+                {/* Header */}
+                <View style={styles.headerRow}>
+                    <View>
+                        <ThemedText title={true} style={styles.title}>
+                            Products
+                        </ThemedText>
+                        <Text style={styles.subtitle}>{products?.length ?? 0} items in stock</Text>
+                    </View>
+                    <Pressable
+                        style={({ pressed }) => [styles.scanButton, pressed && styles.scanButtonPressed]}
+                        onPress={() => router.push('/(dashboard)/scan?mode=lookup')}
+                    >
+                        <Ionicons name="barcode-outline" size={18} color="#fff" />
+                    </Pressable>
+                </View>
 
-                <ThemedText style={styles.title} title={true}>
-                    Products
-                </ThemedText>
                 <Spacer height={20} />
 
                 {products && products.length > 0 ? (
-                    <View>
-                        {products.map((product) => (
-                            <View key={product.$id || product.id} style={[styles.productCard, { backgroundColor: colors.cardBg }]}>
+                    <View style={styles.productsList}>
+                        {products.map((product, idx) => {
+                            const stockLevel = Number(product.stockLevel) || 0;
+                            const isLowStock = stockLevel <= 5;
+                            const category = product.category
+                                ? product.category.replace('_', ' ').replace(/^\w/, c => c.toUpperCase())
+                                : 'Unassigned';
 
-                                {/* Product Title and Price Header Line */}
-                                <View style={styles.productHeader}>
-                                    <ThemedText style={styles.productName}>
-                                        {product.productName || "Unnamed Item"}
-                                    </ThemedText>
-                                    <ThemedText style={styles.productPrice}>
-                                        Rs. {product.price || "0.00"}
-                                    </ThemedText>
-                                </View>
+                            return (
+                                <Pressable
+                                    key={product.$id}
+                                    style={({ pressed }) => [
+                                        styles.productCard,
+                                        { backgroundColor: theme.unibackground },
+                                        pressed && styles.productCardPressed,
+                                    ]}
+                                    onPress={() => handleEdit(product.$id)}
+                                >
+                                    {/* Stock Badge */}
+                                    <View style={[styles.stockBadge, isLowStock && styles.stockBadgeLow]}>
+                                        <Text style={styles.stockBadgeText}>
+                                            {stockLevel}
+                                        </Text>
+                                    </View>
 
-                                <Spacer height={8} />
+                                    {/* Main Content */}
+                                    <View style={styles.productContent}>
+                                        <View style={styles.productHeader}>
+                                            <View style={styles.productInfo}>
+                                                <ThemedText style={styles.productName} numberOfLines={1}>
+                                                    {product.productName || "Unnamed Item"}
+                                                </ThemedText>
+                                                <Text style={styles.productSKU}>SKU: {product.productSKU || "N/A"}</Text>
+                                            </View>
+                                            <ThemedText style={styles.productPrice}>
+                                                Rs.{(Number(product.price) || 0).toFixed(2)}
+                                            </ThemedText>
+                                        </View>
 
-                                {/* Product Category Identifier */}
-                                <ThemedText style={styles.productDescription}>
-                                    Category: {product.category ? product.category.charAt(0).toUpperCase() + product.category.slice(1) : "Unassigned"}
-                                </ThemedText>
+                                        <Spacer height={10} />
 
-                                <Spacer height={10} />
+                                        <View style={styles.productMeta}>
+                                            <View style={styles.metaTag}>
+                                                <Ionicons name="folder-outline" size={12} color={colors.primary} />
+                                                <Text style={styles.metaTagText}>{category}</Text>
+                                            </View>
+                                            <View style={[styles.metaTag, isLowStock && styles.metaTagWarning]}>
+                                                <Ionicons name="cube-outline" size={12} color={isLowStock ? colors.primary : colors.primary} />
+                                                <Text style={[styles.metaTagText, isLowStock && { color: colors.primary }]}>
+                                                    {isLowStock ? 'Low stock' : 'In stock'}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                    </View>
 
-                                {/* Stock Levels and Meta Identifiers */}
-                                <View style={styles.productMeta}>
-                                    <ThemedText style={styles.metaText}>
-                                        SKU: {product.productSKU || "N/A"}
-                                    </ThemedText>
-                                    <ThemedText style={[styles.metaText, { fontWeight: "600", color: product.stockLevel < 5 ? colors.danger : "#333" }]}>
-                                        Stock: {product.stockLevel || 0} units
-                                    </ThemedText>
-                                </View>
-
-                                <Spacer height={15} />
-
-                                {/* Action Buttons Panel */}
-                                <View style={styles.actionButtons}>
-                                    <Pressable
-                                        style={[styles.button, { backgroundColor: colors.primary }]}
-                                        onPress={() => handleEdit(product.$id)}
-                                    >
-                                        <ThemedText style={styles.buttonText}>Edit</ThemedText>
-                                    </Pressable>
-
-                                    <Pressable
-                                        style={[styles.button, { backgroundColor: colors.danger }]}
-                                        onPress={() => handleDelete(product.$id)}
-                                    >
-                                        <ThemedText style={styles.buttonText}>Delete</ThemedText>
-                                    </Pressable>
-                                </View>
-                            </View>
-                        ))}
+                                    {/* Action Buttons */}
+                                    <View style={styles.productActions}>
+                                        <Pressable
+                                            style={({ pressed }) => [styles.actionButton, styles.editButton, pressed && styles.actionButtonPressed]}
+                                            onPress={() => handleEdit(product.$id)}
+                                        >
+                                            <Ionicons name="pencil-outline" size={16} color="#fff" />
+                                        </Pressable>
+                                        <Pressable
+                                            style={({ pressed }) => [
+                                                styles.actionButton,
+                                                styles.deleteButton,
+                                                deletingId === product.$id && styles.actionButtonDisabled,
+                                                pressed && styles.actionButtonPressed,
+                                            ]}
+                                            onPress={() => handleDelete(product.$id, product.productName)}
+                                            disabled={deletingId === product.$id}
+                                        >
+                                            {deletingId === product.$id ? (
+                                                <ActivityIndicator color="#fff" size={14} />
+                                            ) : (
+                                                <Ionicons name="trash-outline" size={16} color="#fff" />
+                                            )}
+                                        </Pressable>
+                                    </View>
+                                </Pressable>
+                            );
+                        })}
                     </View>
                 ) : (
-                    /* Fallback Empty Placeholder UI Gate */
                     <View style={styles.emptyState}>
-                        <ThemedText style={styles.emptyStateText}>
-                            No products yet 📦
-                        </ThemedText>
-                        <Spacer height={10} />
-                        <ThemedText style={styles.emptyStateSubtext}>
-                            Create your first product from the Create tab
-                        </ThemedText>
+                        <Ionicons name="cube-outline" size={48} color={colors.primary} style={{ opacity: 0.2 }} />
+                        <ThemedText style={styles.emptyStateText}>No products yet</ThemedText>
+                        <Text style={styles.emptyStateSubtext}>Create your first product to get started</Text>
                     </View>
                 )}
 
@@ -116,81 +166,157 @@ export default Products;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingHorizontal: 20,
-        paddingTop: 20,
+    },
+    scrollContent: {
+        paddingHorizontal: 16,
+        paddingTop: 16,
+        paddingBottom: 20,
+        flexGrow: 1,
+    },
+    headerRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
     },
     title: {
-        fontSize: 24,
-        fontWeight: "bold",
-        marginTop: 10,
+        fontSize: 28,
+        fontWeight: '800',
+        marginBottom: 4,
+    },
+    subtitle: {
+        fontSize: 13,
+        opacity: 0.5,
+    },
+    scanButton: {
+        width: 44,
+        height: 44,
+        borderRadius: 12,
+        backgroundColor: colors.primary,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    scanButtonPressed: {
+        opacity: 0.8,
+    },
+    productsList: {
+        gap: 12,
     },
     productCard: {
+        borderRadius: 14,
+        padding: 14,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        position: 'relative',
+    },
+    productCardPressed: {
+        opacity: 0.75,
+    },
+    stockBadge: {
+        width: 48,
+        height: 48,
         borderRadius: 12,
-        padding: 15,
-        marginBottom: 15,
-        borderWidth: 1,
-        borderColor: "#eee",
+        backgroundColor: colors.primary + '15',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1.5,
+        borderColor: colors.primary + '30',
     },
-    productHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
+    stockBadgeLow: {
+        backgroundColor: colors.primary + '25',
+        borderColor: colors.primary + '50',
     },
-    productName: {
-        fontSize: 18,
-        fontWeight: "bold",
-        flex: 1,
-    },
-    productPrice: {
-        fontSize: 18,
-        fontWeight: "bold",
+    stockBadgeText: {
+        fontWeight: '800',
+        fontSize: 16,
         color: colors.primary,
     },
-    productDescription: {
-        fontSize: 14,
-        opacity: 0.7,
-        lineHeight: 20,
+    productContent: {
+        flex: 1,
+    },
+    productHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginBottom: 2,
+    },
+    productInfo: {
+        flex: 1,
+        marginRight: 8,
+    },
+    productName: {
+        fontSize: 15,
+        fontWeight: '700',
+        marginBottom: 2,
+    },
+    productSKU: {
+        fontSize: 12,
+        opacity: 0.5,
+    },
+    productPrice: {
+        fontSize: 16,
+        fontWeight: '800',
+        color: colors.primary,
     },
     productMeta: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        gap: 10,
+        flexDirection: 'row',
+        gap: 6,
+        flexWrap: 'wrap',
     },
-    metaText: {
-        fontSize: 13,
-        opacity: 0.6,
-    },
-    actionButtons: {
-        flexDirection: "row",
-        gap: 10,
-    },
-    button: {
-        flex: 1,
-        paddingVertical: 10,
+    metaTag: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
         borderRadius: 8,
-        alignItems: "center",
-        justifyContent: "center",
+        backgroundColor: colors.primary + '10',
     },
-    buttonText: {
-        color: "#fff",
-        fontWeight: "600",
-        fontSize: 14,
+    metaTagWarning: {
+        backgroundColor: colors.primary + '18',
+    },
+    metaTagText: {
+        fontSize: 11,
+        fontWeight: '600',
+        color: colors.primary,
+    },
+    productActions: {
+        flexDirection: 'column',
+        gap: 6,
+    },
+    actionButton: {
+        width: 36,
+        height: 36,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    editButton: {
+        backgroundColor: colors.primary,
+    },
+    deleteButton: {
+        backgroundColor: colors.primary + 'BB',
+    },
+    actionButtonPressed: {
+        opacity: 0.75,
+    },
+    actionButtonDisabled: {
+        opacity: 0.5,
     },
     emptyState: {
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
+        justifyContent: 'center',
+        alignItems: 'center',
         paddingVertical: 80,
+        gap: 12,
     },
     emptyStateText: {
         fontSize: 18,
-        fontWeight: "bold",
+        fontWeight: '700',
     },
     emptyStateSubtext: {
         fontSize: 14,
-        opacity: 0.6,
-        textAlign: "center",
-        marginTop: 5,
+        opacity: 0.5,
+        textAlign: 'center',
     },
 });

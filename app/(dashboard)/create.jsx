@@ -1,187 +1,447 @@
-import { StyleSheet, Text, Keyboard, TouchableWithoutFeedback, TouchableOpacity, View } from "react-native";
-import { useRouter } from "expo-router";
-import { useState, useEffect } from "react";
+import { StyleSheet, Text, Keyboard, TouchableWithoutFeedback, ScrollView, View, Pressable, ActivityIndicator, useColorScheme } from "react-native";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { useState, useEffect, useLayoutEffect } from "react";
 import { useProducts } from "../../hooks/useProducts";
 import { useUser } from "../../hooks/useUser";
-import { Ionicons } from "@expo/vector-icons"; // Added in case you need icons later
-import { colors } from "../../constants/colors"; // Assuming you use this for styling
+import { useNavigation } from "@react-navigation/native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { colors } from "../../constants/colors";
 
 import ThemedView from "../../components/ThemedView";
 import Spacer from "../../components/Spacer";
 import ThemedText from "../../components/ThemedText";
 import ThemedInput from "../../components/ThemedInput";
-import ThemedButton from "../../components/Themedbutton";
-import ThemedLoader from "../../components/ThemedLoader";
+
+const CATEGORY_OPTIONS = [
+    'electronics', 'furniture', 'apparel', 'health', 'beauty',
+    'groceries', 'stationery', 'toys', 'sports', 'kitchenware',
+    'tools', 'automotive', 'books', 'footwear', 'accessories',
+    'home_decor', 'pet_supplies', 'office_supplies', 'other',
+];
 
 const Create = () => {
     const { user, authChecked } = useUser();
     const router = useRouter();
+    const navigation = useNavigation();
+    const insets = useSafeAreaInsets();
+    const colorScheme = useColorScheme();
+    const theme = colors[colorScheme] ?? colors.light;
+    const { scannedSKU, scannedName, scannedCategory } = useLocalSearchParams();
 
     const [productName, setProductName] = useState('');
     const [productSKU, setProductSKU] = useState('');
     const [price, setPrice] = useState('');
     const [stockLevel, setStockLevel] = useState('');
     const [category, setCategory] = useState('');
-    const [expiryDate, setExpiryDate] = useState(new Date().toISOString());
     const [loading, setLoading] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
-
-    // Valid Appwrite enum options
-    const categoryOptions = ['electronics', 'furniture', 'apparel', 'health', 'beauty'];
+    const [error, setError] = useState(null);
 
     const { createProduct } = useProducts();
 
-    // Route Guard
+    useLayoutEffect(() => {
+        navigation.setOptions({ headerShown: false });
+    }, [navigation]);
+
     useEffect(() => {
         if (authChecked && !user) {
             router.replace("/(auth)/login");
         }
-    }, [authChecked, user, router]);
+    }, [authChecked, user]);
+
+    useEffect(() => {
+        if (scannedSKU) {
+            setProductSKU(decodeURIComponent(scannedSKU));
+        }
+        if (scannedName) {
+            setProductName(decodeURIComponent(scannedName));
+        }
+        if (scannedCategory) {
+            setCategory(decodeURIComponent(scannedCategory));
+        }
+    }, [scannedSKU, scannedName, scannedCategory]);
 
     const handleSubmit = async () => {
-        // Basic validation
-        if (!productName.trim() || !productSKU.trim() || !price.trim() || !category) return;
+        setError(null);
+        if (!productName.trim() || !productSKU.trim() || !price.trim() || !category) {
+            setError("Please fill in all fields");
+            return;
+        }
 
         try {
             setLoading(true);
-
-            await createProduct({
-                productName: productName.trim(),
-                productSKU: productSKU.trim(),
-                price: parseFloat(price),
-                stockLevel: parseInt(stockLevel) || 0,
-                category: category.trim(),
-                expiry_date: expiryDate
-            }, user);
+            await createProduct(
+                {
+                    productName: productName.trim(),
+                    productSKU: productSKU.trim(),
+                    price: parseFloat(price),
+                    stockLevel: parseInt(stockLevel) || 0,
+                    category: category.trim(),
+                    expiry_date: new Date().toISOString(),
+                },
+                user
+            );
 
             setProductName('');
             setProductSKU('');
             setPrice('');
             setStockLevel('');
             setCategory('');
-
             router.replace("/products");
         } catch (error) {
-            console.error("Form Submission Error:", error.message);
+            setError(error.message || "Failed to create product");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); setDropdownOpen(false); }}>
             <ThemedView style={styles.container}>
-                {!authChecked ? (
-                    <ThemedLoader />
-                ) : (
-                    <>
-                        <ThemedText style={styles.title1} title={true}>Create Product</ThemedText>
-                        <Spacer height={15} />
+                {/* Custom Header */}
+                <View style={[styles.header, { paddingTop: insets.top + 10, backgroundColor: theme.navbackground }]}>
+                    <Pressable onPress={() => router.back()} hitSlop={12} style={styles.headerButton}>
+                        <Ionicons name="chevron-back" size={26} color={theme.title} />
+                    </Pressable>
+                    <ThemedText title={true} style={styles.headerTitle}>
+                        Add Product
+                    </ThemedText>
+                    <View style={styles.headerButton} />
+                </View>
 
-                        <ThemedInput style={{ width: '80%' }} placeholder="Product Name" onChangeText={setProductName} value={productName} />
-                        <ThemedInput style={{ width: '80%' }} placeholder="SKU / Barcode" onChangeText={setProductSKU} value={productSKU} />
-                        <ThemedInput style={{ width: '80%' }} placeholder="Price" keyboardType="numeric" onChangeText={setPrice} value={price} />
-                        <ThemedInput style={{ width: '80%' }} placeholder="Stock Quantity" keyboardType="number-pad" onChangeText={setStockLevel} value={stockLevel} />
+                <ScrollView
+                    contentContainerStyle={styles.scrollContent}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
+                    {/* Form Section */}
+                    <View style={styles.formSection}>
+                        <View style={[styles.inputCard, { backgroundColor: theme.unibackground }]}>
+                            <FormField
+                                icon="text-outline"
+                                label="Product Name"
+                                placeholder="e.g., Organic Coffee"
+                                value={productName}
+                                onChangeText={setProductName}
+                                editable={!loading}
+                            />
+                            <Divider />
+                            <FormField
+                                icon="barcode-outline"
+                                label="SKU / Barcode"
+                                placeholder="e.g., FUR-0021"
+                                value={productSKU}
+                                onChangeText={setProductSKU}
+                                editable={!loading}
+                            />
+                            <Divider />
+                            <FormField
+                                icon="cash-outline"
+                                label="Price (Rs.)"
+                                placeholder="0.00"
+                                keyboardType="decimal-pad"
+                                value={price}
+                                onChangeText={setPrice}
+                                editable={!loading}
+                            />
+                            <Divider />
+                            <FormField
+                                icon="layers-outline"
+                                label="Stock Quantity"
+                                placeholder="0"
+                                keyboardType="number-pad"
+                                value={stockLevel}
+                                onChangeText={setStockLevel}
+                                editable={!loading}
+                            />
+                        </View>
 
-                        {/* Custom Dropdown */}
-                        <TouchableOpacity
-                            style={[styles.dropdown, { width: '80%' }]}
-                            onPress={() => setDropdownOpen(!dropdownOpen)}
-                        >
-                            <Text style={styles.dropdownText}>
-                                {/* Capitalize the first letter for the UI display if a category is selected */}
-                                {category ? category.charAt(0).toUpperCase() + category.slice(1) : 'Select Category'}
-                            </Text>
-                            <Text style={styles.dropdownArrow}>▼</Text>
-                        </TouchableOpacity>
+                        <Spacer height={16} />
 
-                        {dropdownOpen && (
-                            <View style={[styles.dropdownList, { width: '80%' }]}>
-                                {categoryOptions.map((option) => (
-                                    <TouchableOpacity
-                                        key={option}
-                                        style={styles.dropdownItem}
-                                        onPress={() => {
-                                            setCategory(option); // Saves lowercase to match Appwrite
-                                            setDropdownOpen(false);
-                                        }}
-                                    >
-                                        {/* Capitalize the first letter for the dropdown list visually */}
-                                        <Text style={styles.dropdownItemText}>
-                                            {option.charAt(0).toUpperCase() + option.slice(1)}
+                        {/* Category Selector */}
+                        <View style={styles.categorySection}>
+                            <ThemedText style={styles.categoryLabel}>Category</ThemedText>
+                            <View style={styles.dropdownWrapper}>
+                                <Pressable
+                                    style={[styles.dropdown, { backgroundColor: theme.unibackground }]}
+                                    onPress={() => setDropdownOpen(!dropdownOpen)}
+                                    activeOpacity={0.7}
+                                >
+                                    <View style={styles.dropdownLabelRow}>
+                                        <Ionicons name="folder-outline" size={16} color={colors.primary} />
+                                        <Text style={styles.dropdownText}>
+                                            {category ? category.replace('_', ' ').replace(/^\w/, c => c.toUpperCase()) : 'Select category'}
                                         </Text>
-                                    </TouchableOpacity>
-                                ))}
+                                    </View>
+                                    <Ionicons
+                                        name={dropdownOpen ? 'chevron-up' : 'chevron-down'}
+                                        size={18}
+                                        color={colors.primary}
+                                    />
+                                </Pressable>
+
+                                {dropdownOpen && (
+                                    <View style={[styles.dropdownList, { backgroundColor: theme.unibackground }]}>
+                                        <ScrollView nestedScrollEnabled keyboardShouldPersistTaps="handled">
+                                            {CATEGORY_OPTIONS.map((option) => (
+                                                <Pressable
+                                                    key={option}
+                                                    style={({ pressed }) => [
+                                                        styles.dropdownItem,
+                                                        category === option && styles.dropdownItemSelected,
+                                                        pressed && styles.dropdownItemPressed,
+                                                    ]}
+                                                    onPress={() => {
+                                                        setCategory(option);
+                                                        setDropdownOpen(false);
+                                                    }}
+                                                >
+                                                    <Text style={[styles.dropdownItemText, category === option && styles.dropdownItemTextSelected]}>
+                                                        {option.replace('_', ' ').replace(/^\w/, c => c.toUpperCase())}
+                                                    </Text>
+                                                    {category === option && (
+                                                        <Ionicons name="checkmark" size={18} color={colors.primary} />
+                                                    )}
+                                                </Pressable>
+                                            ))}
+                                        </ScrollView>
+                                    </View>
+                                )}
                             </View>
+                        </View>
+                    </View>
+
+                    <Spacer height={20} />
+
+                    {/* Error Message */}
+                    {error && (
+                        <View style={styles.errorBox}>
+                            <Ionicons name="alert-circle" size={16} color={colors.primary} />
+                            <Text style={styles.errorText}>{error}</Text>
+                        </View>
+                    )}
+
+                    <Spacer height={20} />
+
+                    {/* Submit Button */}
+                    <Pressable
+                        style={({ pressed }) => [
+                            styles.submitButton,
+                            { backgroundColor: colors.primary },
+                            (loading || pressed) && styles.submitButtonPressed,
+                        ]}
+                        onPress={handleSubmit}
+                        disabled={loading}
+                    >
+                        {loading ? (
+                            <ActivityIndicator color="#fff" />
+                        ) : (
+                            <>
+                                <Ionicons name="checkmark-circle-outline" size={18} color="#fff" />
+                                <ThemedText style={styles.submitButtonText}>Create Product</ThemedText>
+                            </>
                         )}
+                    </Pressable>
 
-                        <Spacer height={20} />
+                    <Spacer height={12} />
 
-                        <ThemedButton onPress={handleSubmit} disabled={loading}>
-                            {loading ? (
-                                <ThemedLoader />
-                            ) : (
-                                <ThemedText style={{ textAlign: 'center', color: '#fff' }}>
-                                    Create Product
-                                </ThemedText>
-                            )}
-                        </ThemedButton>
-                    </>
-                )}
+                    <Pressable
+                        style={({ pressed }) => [styles.cancelButton, pressed && { opacity: 0.6 }]}
+                        onPress={() => router.back()}
+                        disabled={loading}
+                    >
+                        <ThemedText style={styles.cancelButtonText}>Cancel</ThemedText>
+                    </Pressable>
+
+                    <Spacer height={40} />
+                </ScrollView>
             </ThemedView>
         </TouchableWithoutFeedback>
     );
 };
+
+const FormField = ({ icon, label, ...inputProps }) => (
+    <View style={styles.field}>
+        <View style={styles.fieldLabelRow}>
+            <Ionicons name={icon} size={15} color={colors.primary} style={styles.fieldIcon} />
+            <ThemedText style={styles.fieldLabel}>{label}</ThemedText>
+        </View>
+        <ThemedInput style={styles.fieldInput} {...inputProps} />
+    </View>
+);
+
+const Divider = () => <View style={styles.divider} />;
 
 export default Create;
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
     },
-    title1: {
-        fontWeight: 'bold',
-        fontSize: 24,
-        marginBottom: 20
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 12,
+        paddingBottom: 14,
+    },
+    headerButton: {
+        width: 32,
+        alignItems: 'center',
+    },
+    headerTitle: {
+        flex: 1,
+        textAlign: 'center',
+        fontSize: 17,
+        fontWeight: '700',
+    },
+    scrollContent: {
+        paddingHorizontal: 16,
+        paddingTop: 20,
+        paddingBottom: 40,
+    },
+    formSection: {
+        gap: 16,
+    },
+    inputCard: {
+        borderRadius: 14,
+        paddingHorizontal: 14,
+        paddingVertical: 6,
+    },
+    field: {
+        paddingVertical: 12,
+    },
+    fieldLabelRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 8,
+        gap: 6,
+    },
+    fieldIcon: {},
+    fieldLabel: {
+        fontSize: 12,
+        fontWeight: '700',
+        textTransform: 'uppercase',
+        letterSpacing: 0.3,
+        opacity: 0.65,
+    },
+    fieldInput: {
+        backgroundColor: 'transparent',
+        paddingHorizontal: 0,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: 'rgba(0,0,0,0.08)',
+    },
+    categorySection: {
+        gap: 8,
+    },
+    categoryLabel: {
+        fontSize: 12,
+        fontWeight: '700',
+        textTransform: 'uppercase',
+        letterSpacing: 0.3,
+        opacity: 0.65,
+        paddingHorizontal: 4,
+    },
+    dropdownWrapper: {
+        position: 'relative',
+        zIndex: 20,
     },
     dropdown: {
-        marginTop: 10,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 8,
-        paddingHorizontal: 12,
+        borderRadius: 12,
+        paddingHorizontal: 14,
         paddingVertical: 12,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: '#fff',
+    },
+    dropdownLabelRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        flex: 1,
     },
     dropdownText: {
-        fontSize: 16,
-        color: '#333',
-    },
-    dropdownArrow: {
-        fontSize: 12,
-        color: '#666',
+        fontSize: 15,
+        fontWeight: '500',
     },
     dropdownList: {
-        marginTop: 5,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 8,
-        backgroundColor: '#fff',
-        maxHeight: 200, // Keeps the list from getting too long on small screens
+        position: 'absolute',
+        top: '100%',
+        left: 0,
+        right: 0,
+        marginTop: 6,
+        borderRadius: 12,
+        maxHeight: 240,
+        zIndex: 30,
+        elevation: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 6,
     },
     dropdownItem: {
-        paddingHorizontal: 12,
+        paddingHorizontal: 14,
         paddingVertical: 12,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         borderBottomWidth: 1,
-        borderBottomColor: '#eee',
+        borderBottomColor: 'rgba(0,0,0,0.08)',
+    },
+    dropdownItemSelected: {
+        backgroundColor: colors.primary + '08',
+    },
+    dropdownItemPressed: {
+        opacity: 0.6,
     },
     dropdownItemText: {
-        fontSize: 16,
-        color: '#333',
+        fontSize: 15,
+    },
+    dropdownItemTextSelected: {
+        color: colors.primary,
+        fontWeight: '600',
+    },
+    errorBox: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        paddingHorizontal: 14,
+        paddingVertical: 12,
+        borderRadius: 10,
+        backgroundColor: colors.primary + '12',
+    },
+    errorText: {
+        color: colors.primary,
+        fontSize: 13,
+        fontWeight: '500',
+        flex: 1,
+    },
+    submitButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        paddingVertical: 15,
+        borderRadius: 12,
+    },
+    submitButtonPressed: {
+        opacity: 0.8,
+    },
+    submitButtonText: {
+        color: '#fff',
+        fontSize: 15,
+        fontWeight: '700',
+    },
+    cancelButton: {
+        paddingVertical: 12,
+        alignItems: 'center',
+    },
+    cancelButtonText: {
+        fontSize: 14,
+        opacity: 0.5,
+        fontWeight: '600',
     },
 });

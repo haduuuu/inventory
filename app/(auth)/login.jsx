@@ -25,8 +25,7 @@ const Login = () => {
         setLoading(true)
         try {
             await login(email, password)
-            // Redirect to dashboard after successful login
-            router.replace('/(dashboard)/dash')
+            router.replace('/')
         } catch (error) {
             setError(error.message || "Error logging in")
         } finally {
