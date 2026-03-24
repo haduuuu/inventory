@@ -1,5 +1,6 @@
 {
   "expo": {
+    "scheme": "mobile-app-scheme",
     "name": "mobile-app",
     "slug": "mobile-app",
     "version": "1.0.0",
