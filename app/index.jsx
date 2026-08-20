@@ -1,6 +1,6 @@
 import { StyleSheet, View, ScrollView, Pressable, useColorScheme, RefreshControl, Text } from 'react-native'
 import React, { useContext, useEffect, useState, useCallback } from 'react'
-import { Link, useRouter } from 'expo-router'
+import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import ThemedView from '../components/ThemedView'
 import ThemedText from '../components/ThemedText'
@@ -75,18 +75,27 @@ const Home = () => {
             >
                 {/* Greeting Section */}
                 <View style={styles.greetingSection}>
-                    <View>
+                    <Pressable
+                        style={({ pressed }) => [styles.profileButton, pressed && { opacity: 0.7 }]}
+                        onPress={() => router.push('/profile')}
+                        hitSlop={12}
+                    >
+                        <View style={[styles.avatarCircle, { backgroundColor: colors.primary + '20' }]}>
+                            <Ionicons name="person" size={24} color={colors.primary} />
+                        </View>
+                    </Pressable>
+                    <View style={{ flex: 1 }}>
                         <ThemedText style={styles.greeting}>
-                            {user ? `Hello${user.name ? `, ${user.name}` : ''}` : 'Welcome'}
+                            {user ? `  Hello${user.name ? `, ${user.name}` : ''}` : 'Welcome'}
                         </ThemedText>
-                        <ThemedText style={styles.subGreeting}>Manage your inventory</ThemedText>
+                        <ThemedText style={styles.subGreeting}>  Manage your inventory</ThemedText>
                     </View>
                     <View style={[styles.avatarCircle, { backgroundColor: colors.primary + '20' }]}>
                         <Ionicons name="cube" size={24} color={colors.primary} />
                     </View>
                 </View>
 
-                <Spacer height={24} />
+                <Spacer height={40} />
 
                 {/* Quick Actions */}
                 <View style={styles.quickActionsSection}>
@@ -111,7 +120,7 @@ const Home = () => {
                     <Pressable
                         style={({ pressed }) => [
                             styles.actionCard,
-                            { backgroundColor: colors.primary + 'DD' },
+                            { backgroundColor: colors.primary },
                             pressed && styles.actionCardPressed,
                         ]}
                         onPress={() => router.push('/create')}
@@ -139,7 +148,7 @@ const Home = () => {
                         <ThemedText style={styles.statLabel}>Total Stock</ThemedText>
                     </View>
 
-                    <View style={[styles.statCard, { backgroundColor: colors.primary + '15' }]}>
+                    <View style={[styles.statCard, { backgroundColor: theme.unibackground }]}>
                         <View style={styles.statIconBox}>
                             <Ionicons name="alert-circle-outline" size={20} color={colors.primary} />
                         </View>
@@ -149,7 +158,7 @@ const Home = () => {
                         <ThemedText style={styles.statLabel}>Low Stock</ThemedText>
                     </View>
 
-                    <View style={[styles.statCard, { backgroundColor: colors.primary + '08' }]}>
+                    <View style={[styles.statCard, { backgroundColor: theme.unibackground }]}>
                         <View style={styles.statIconBox}>
                             <Ionicons name="time-outline" size={20} color={colors.primary} />
                         </View>
@@ -287,6 +296,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
+        gap: 12,
+    },
+    profileButton: {
+        width: 40,
+        height: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 12,
+        backgroundColor: colors.primary + '10',
     },
     greeting: {
         fontSize: 28,
