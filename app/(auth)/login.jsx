@@ -92,11 +92,11 @@ const styles = StyleSheet.create({
         padding: 10,
         borderRadius: 5,
     },
-    pressed: {
-        opacity: 0.7,
-    },
-    error: {
-        color: colors.warning,
+    button: {
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        alignItems: 'center',
         marginTop: 10,
         padding: 10,
         borderRadius: 5,
