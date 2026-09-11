@@ -39,7 +39,9 @@
         {
           "cameraPermission": "This app uses the camera to scan product barcodes."
         }
-      ]
+      ],
+      "expo-sharing",
+      "expo-status-bar"
     ]
   }
 }

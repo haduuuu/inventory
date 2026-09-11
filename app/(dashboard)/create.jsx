@@ -6,8 +6,10 @@ import { useUser } from "../../hooks/useUser";
 import { useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import LanguageSwitcher from "../../components/LanguageSwitcher";
+import { useLanguage } from "../../contexts/LanguageContext";
+import { t } from "../../constants/localization";
 import { colors } from "../../constants/colors";
-
 import ThemedView from "../../components/ThemedView";
 import Spacer from "../../components/Spacer";
 import ThemedText from "../../components/ThemedText";
@@ -27,6 +29,7 @@ const Create = () => {
     const insets = useSafeAreaInsets();
     const colorScheme = useColorScheme();
     const theme = colors[colorScheme] ?? colors.light;
+    const { language } = useLanguage();
     const { scannedSKU, scannedName, scannedCategory } = useLocalSearchParams();
 
     const [productName, setProductName] = useState('');
@@ -65,7 +68,7 @@ const Create = () => {
     const handleSubmit = async () => {
         setError(null);
         if (!productName.trim() || !productSKU.trim() || !price.trim() || !category) {
-            setError("Please fill in all fields");
+            setError(t(language, 'create_validation_error'));
             return;
         }
 
@@ -90,7 +93,7 @@ const Create = () => {
             setCategory('');
             router.replace("/products");
         } catch (error) {
-            setError(error.message || "Failed to create product");
+            setError(error.message || t(language, 'error_try_again'));
         } finally {
             setLoading(false);
         }
@@ -105,9 +108,9 @@ const Create = () => {
                         <Ionicons name="chevron-back" size={26} color={theme.title} />
                     </Pressable>
                     <ThemedText title={true} style={styles.headerTitle}>
-                        Add Product
+                        {t(language, 'create_title')}
                     </ThemedText>
-                    <View style={styles.headerButton} />
+                    <LanguageSwitcher />
                 </View>
 
                 <ScrollView
@@ -120,8 +123,8 @@ const Create = () => {
                         <View style={[styles.inputCard, { backgroundColor: theme.unibackground }]}>
                             <FormField
                                 icon="text-outline"
-                                label="Product Name"
-                                placeholder="e.g., Organic Coffee"
+                                label={t(language, 'create_product_name')}
+                                placeholder={t(language, 'create_product_name_hint')}
                                 value={productName}
                                 onChangeText={setProductName}
                                 editable={!loading}
@@ -129,8 +132,8 @@ const Create = () => {
                             <Divider />
                             <FormField
                                 icon="barcode-outline"
-                                label="SKU / Barcode"
-                                placeholder="e.g., FUR-0021"
+                                label={t(language, 'create_sku_barcode')}
+                                placeholder={t(language, 'create_sku_hint')}
                                 value={productSKU}
                                 onChangeText={setProductSKU}
                                 editable={!loading}
@@ -138,8 +141,8 @@ const Create = () => {
                             <Divider />
                             <FormField
                                 icon="cash-outline"
-                                label="Price (Rs.)"
-                                placeholder="0.00"
+                                label={t(language, 'create_price')}
+                                placeholder={t(language, 'create_price_hint')}
                                 keyboardType="decimal-pad"
                                 value={price}
                                 onChangeText={setPrice}
@@ -148,8 +151,8 @@ const Create = () => {
                             <Divider />
                             <FormField
                                 icon="layers-outline"
-                                label="Stock Quantity"
-                                placeholder="0"
+                                label={t(language, 'create_stock_quantity')}
+                                placeholder={t(language, 'create_stock_hint')}
                                 keyboardType="number-pad"
                                 value={stockLevel}
                                 onChangeText={setStockLevel}
@@ -161,7 +164,9 @@ const Create = () => {
 
                         {/* Category Selector */}
                         <View style={styles.categorySection}>
-                            <ThemedText style={styles.categoryLabel}>Category</ThemedText>
+                            <ThemedText style={styles.categoryLabel}>
+                                {t(language, 'create_category')}
+                            </ThemedText>
                             <View style={styles.dropdownWrapper}>
                                 <Pressable
                                     style={[styles.dropdown, { backgroundColor: theme.unibackground }]}
@@ -171,7 +176,7 @@ const Create = () => {
                                     <View style={styles.dropdownLabelRow}>
                                         <Ionicons name="folder-outline" size={16} color={colors.primary} />
                                         <Text style={styles.dropdownText}>
-                                            {category ? category.replace('_', ' ').replace(/^\w/, c => c.toUpperCase()) : 'Select category'}
+                                            {category ? category.replace('_', ' ').replace(/^\w/, c => c.toUpperCase()) : t(language, 'create_select_category')}
                                         </Text>
                                     </View>
                                     <Ionicons
@@ -239,7 +244,9 @@ const Create = () => {
                         ) : (
                             <>
                                 <Ionicons name="checkmark-circle-outline" size={18} color="#fff" />
-                                <ThemedText style={styles.submitButtonText}>Create Product</ThemedText>
+                                <ThemedText style={styles.submitButtonText}>
+                                    {t(language, 'create_submit')}
+                                </ThemedText>
                             </>
                         )}
                     </Pressable>
@@ -251,7 +258,9 @@ const Create = () => {
                         onPress={() => router.back()}
                         disabled={loading}
                     >
-                        <ThemedText style={styles.cancelButtonText}>Cancel</ThemedText>
+                        <ThemedText style={styles.cancelButtonText}>
+                            {t(language, 'cancel')}
+                        </ThemedText>
                     </Pressable>
 
                     <Spacer height={40} />

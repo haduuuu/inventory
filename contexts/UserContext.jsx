@@ -1,72 +1,51 @@
-import { useState, createContext, useEffect } from "react";
-import { account } from "../lib/appwrite";
+import { createContext, useState, useContext } from 'react';
 
 export const UserContext = createContext();
 
-export function UserProvider({ children }) {
-    const [user, setUser] = useState(null);
-    const [authChecked, setAuthChecked] = useState(false);
-    const [loading, setLoading] = useState(false);
+export const UserProvider = ({ children }) => {
+    const [user, setUser] = useState({
+        isAuthenticated: false,
+        email: null,
+        username: null,
+    });
 
-    // Initial silent check on bootup
-    useEffect(() => {
-        async function checkInitialAuth() {
-            try {
-                const currentSession = await account.get();
-                setUser(currentSession);
-            } catch (error) {
-                setUser(null);
-            } finally {
-                setAuthChecked(true);
-            }
-        }
-        checkInitialAuth();
-    }, []);
+    const login = async (email, password) => {
+        // Login logic here
+        setUser({
+            isAuthenticated: true,
+            email,
+            username: email.split('@')[0],
+        });
+    };
 
-    async function login(email, password) {
-        try {
-            try {
-                await account.deleteSession("current");
-            } catch (e) { }
+    const register = async (email, password) => {
+        // Register logic here
+        setUser({
+            isAuthenticated: true,
+            email,
+            username: email.split('@')[0],
+        });
+    };
 
-            await account.createEmailPasswordSession(email, password);
-            const response = await account.get();
-            setUser(response);
-        } catch (error) {
-            console.error("Login Error:", error.message);
-            throw new Error(error.message || "Error logging in");
-        }
-    }
-
-    async function register(email, password) {
-        try {
-            // Create a new account
-            const newAccount = await account.create('unique()', email, password);
-            // Log in the new account
-            await account.createEmailPasswordSession(email, password);
-            const response = await account.get();
-            setUser(response);
-        } catch (error) {
-            console.error("Register Error:", error.message);
-            throw new Error(error.message || "Error registering user");
-        }
-    }
-
-    async function logout() {
-        try {
-            setLoading(true);
-            await account.deleteSession("current");
-            setUser(null);
-        } catch (error) {
-            console.error("Logout Error:", error.message);
-        } finally {
-            setLoading(false);
-        }
-    }
+    const logout = () => {
+        setUser({
+            isAuthenticated: false,
+            email: null,
+            username: null,
+        });
+    };
 
     return (
-        <UserContext.Provider value={{ user, authChecked, loading, login, logout, register }}>
+        <UserContext.Provider value={{ user, setUser, login, register, logout }}>
             {children}
         </UserContext.Provider>
     );
-}
+};
+
+export const useUser = () => {
+    const context = useContext(UserContext);
+    if (!context) {
+        throw new Error('useUser must be used within UserProvider');
+    }
+    return context;
+};

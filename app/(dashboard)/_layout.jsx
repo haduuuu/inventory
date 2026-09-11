@@ -1,25 +1,21 @@
-import { Tabs } from "expo-router"
-import { useColorScheme } from "react-native"
-import { colors } from "../../constants/colors"
-import { Ionicons } from "@expo/vector-icons"
-import { UserProvider } from "../../contexts/UserContext"
-import UserOnly from "../../components/auth/UserOnly"
+import { Stack } from 'expo-router';
+import { colors } from '../../constants/colors';
 
-const DashboardLayout = () => {
-    const colorScheme = useColorScheme()
-    const theme = colors[colorScheme] ?? colors.light
+export default function DashboardLayout() {
+    const theme = colors.light;
 
     return (
-        <UserOnly>
-            <Tabs screenOptions={{ headerShown: false, tabBarStyle: { backgroundColor: theme.navbackground, paddingTop: 10, height: 90 }, tabBarActiveTintColor: theme.iconcolorfocused, tabBarInactiveTintColor: theme.iconcolor }}>
-                <Tabs.Screen name="create" options={{ title: "Create", tabBarIcon: ({ focused }) => <Ionicons size={24} name={focused ? "create" : "create-outline"} color={focused ? theme.iconcolorfocused : theme.iconcolor} /> }} />
-                <Tabs.Screen name="products" options={{ title: "Products", tabBarIcon: ({ focused }) => <Ionicons size={24} name={focused ? "cart" : "cart-outline"} color={focused ? theme.iconcolorfocused : theme.iconcolor} /> }} />
-                <Tabs.Screen name="profile" options={{ title: "Profile", tabBarIcon: ({ focused }) => <Ionicons size={24} name={focused ? "person" : "person-outline"} color={focused ? theme.iconcolorfocused : theme.iconcolor} /> }} />
-            </Tabs>
-        </UserOnly>
-
-    )
-
+        <Stack
+            screenOptions={{
+                headerStyle: { backgroundColor: theme.navbackground },
+                headerTintColor: theme.title,
+            }}
+        >
+            <Stack.Screen name="products" options={{ title: "Products", headerShown: false }} />
+            <Stack.Screen name="create" options={{ title: "Add Product", headerShown: true }} />
+            <Stack.Screen name="edit" options={{ title: "Edit Product", headerShown: true }} />
+            <Stack.Screen name="scan" options={{ title: "Scan", headerShown: true }} />
+            <Stack.Screen name="profile" options={{ title: "Profile", headerShown: true }} />
+        </Stack>
+    );
 }
-
-export default DashboardLayout

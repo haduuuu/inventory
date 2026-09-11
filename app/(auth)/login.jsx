@@ -1,96 +1,75 @@
-import { TouchableWithoutFeedback, Keyboard, StyleSheet, Pressable, ActivityIndicator, Text } from 'react-native'
-import React from 'react'
-import { Link, useRouter } from 'expo-router'
-import ThemedView from '../../components/ThemedView'
-import ThemedLogo from '../../components/ThemedLogo'
-import Spacer from '../../components/Spacer'
-import ThemedText from '../../components/ThemedText'
-import { colors } from '../../constants/colors'
-import ThemedButton from '../../components/Themedbutton'
-import ThemedInput from '../../components/ThemedInput'
-import { useState, useEffect } from 'react'
-import { useUser } from '../../hooks/useUser'
+import { View, Text, TouchableOpacity, StyleSheet, TextInput } from 'react-native';
+import { useRouter } from 'expo-router';
+import { colors } from '../../constants/colors';
+import { useState } from 'react';
 
-const Login = () => {
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [error, setError] = useState(null)
-    const [loading, setLoading] = useState(false)
+export default function Login() {
+    const router = useRouter();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
 
-    const { login } = useUser()
-    const router = useRouter()
-
-    const handleSumit = async () => {
-        setError(null)
-        setLoading(true)
-        try {
-            await login(email, password)
-            router.replace('/')
-        } catch (error) {
-            setError(error.message || "Error logging in")
-        } finally {
-            setLoading(false)
-        }
-    }
-
-
+    const handleLogin = () => {
+        // Add login logic here
+        router.replace('/(dashboard)/products');
+    };
 
     return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <ThemedView style={styles.container}>
-                <ThemedText style={styles.title1} title={true}> Login </ThemedText>
-                <Spacer height={20} />
-                <ThemedInput
-                    style={{ width: '80%' }}
-                    placeholder="Email"
-                    keyboardType="email-address"
-                    onChangeText={setEmail}
-                    value={email}
-                    editable={!loading}
-                />
-                <ThemedInput
-                    style={{ width: '80%' }}
-                    placeholder="Password"
-                    secureTextEntry
-                    onChangeText={setPassword}
-                    value={password}
-                    editable={!loading}
-                />
+        <View style={[styles.container, { backgroundColor: colors.light.background }]}>
+            <Text style={[styles.title, { color: colors.primary }]}>Login</Text>
 
-                <ThemedButton onPress={handleSumit} disabled={loading}>
-                    {loading ? (
-                        <ActivityIndicator color="#fff" />
-                    ) : (
-                        <ThemedText style={{ textAlign: 'center', color: '#fff' }}> Login </ThemedText>
-                    )}
-                </ThemedButton>
-                <Spacer height={10} />
-                {error && <Text style={styles.error}>{error}</Text>}
-                <ThemedText style={{ textAlign: 'center' }}>
-                    <Link href="/(auth)/register"> Register instead </Link>
-                    <Link href="/"> home </Link>
-                </ThemedText>
-            </ThemedView>
-        </TouchableWithoutFeedback>
-    )
+            <TextInput
+                style={styles.input}
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+                placeholderTextColor="#999"
+            />
+
+            <TextInput
+                style={styles.input}
+                placeholder="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                placeholderTextColor="#999"
+            />
+
+            <TouchableOpacity
+                style={[styles.button, { backgroundColor: colors.primary }]}
+                onPress={handleLogin}
+            >
+                <Text style={styles.buttonText}>Login</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
+                <Text style={[styles.link, { color: colors.primary }]}>
+                    Don't have an account? Register
+                </Text>
+            </TouchableOpacity>
+        </View>
+    );
 }
-
-export default Login
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center',
-    }
-    , title1: {
-        fontSize: 18,
-        marginBottom: 20,
+        paddingHorizontal: 20,
     },
-    btn: {
-        backgroundColor: colors.primary,
-        padding: 10,
-        borderRadius: 5,
+    title: {
+        fontSize: 24,
+
+        fontWeight: 'bold',
+        marginBottom: 20,
+        textAlign: 'center',
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: '#ddd',
+        padding: 12,
+        marginBottom: 12,
+        borderRadius: 8,
+        color: '#333',
     },
     button: {
         paddingVertical: 12,
@@ -98,8 +77,16 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         alignItems: 'center',
         marginTop: 10,
-        padding: 10,
-        borderRadius: 5,
-        backgroundColor: colors.warning + "20"
-    }
-})
+    },
+    buttonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    link: {
+        marginTop: 15,
+        textAlign: 'center',
+        fontSize: 14,
+        textDecorationLine: 'underline',
+    },
+});

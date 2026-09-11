@@ -1,221 +1,339 @@
-import { StyleSheet, View, ScrollView, Pressable, Text } from "react-native";
-import { useUser } from "../../hooks/useUser";
-import { Ionicons } from "@expo/vector-icons";
-import { useColorScheme } from "react-native";
-
-// Custom Themed Components
-import ThemedView from "../../components/ThemedView";
-import ThemedText from "../../components/ThemedText";
-import ThemedButton from "../../components/Themedbutton";
-import ThemedLoader from "../../components/ThemedLoader";
-import Spacer from "../../components/Spacer";
+import { StyleSheet, View, ScrollView, Pressable, Alert, useColorScheme, Text } from 'react-native'
+import { useRouter } from 'expo-router'
+import { Ionicons } from '@expo/vector-icons'
+import ThemedView from '../../components/ThemedView'
+import ThemedText from '../../components/ThemedText'
+import Spacer from '../../components/Spacer'
+import { useUser } from '../../hooks/useUser'
+import { useLanguage } from '../../contexts/LanguageContext'
+import { t } from '../../constants/localization'
+import { colors } from '../../constants/colors'
 
 const Profile = () => {
-    const isDarkMode = useColorScheme() === "dark";
+    const { user, logout } = useUser()
+    const router = useRouter()
+    const colorScheme = useColorScheme()
+    const theme = colors[colorScheme] ?? colors.light
+    const { language, changeLanguage } = useLanguage()
 
-    // 2. Pick dark pink for light mode, light pink for dark mode
-    const dynamicPink = isDarkMode ? "#F48FB1" : "#C2185B";
-    const { logout, user, loading } = useUser();
-
-    const handleLogout = async () => {
-        try {
-            await logout();
-        } catch (error) {
-            console.error("Logout failed:", error.message);
-        }
-    };
-
-    // Fallback theme colors in case global theme context isn't wrapped here
-    const cardBackground = "#f9f9f9";
-    const primaryColor = "#13159b";
+    const handleLogout = () => {
+        Alert.alert(
+            t(language, 'profile_logout'),
+            t(language, 'profile_logout_confirm'),
+            [
+                { text: t(language, 'cancel'), style: 'cancel' },
+                {
+                    text: t(language, 'profile_logout'),
+                    style: 'destructive',
+                    onPress: async () => {
+                        await logout()
+                        router.replace('/(auth)/login')
+                    },
+                },
+            ]
+        )
+    }
 
     return (
         <ThemedView style={styles.container}>
-            <ScrollView showsVerticalScrollIndicator={false}>
-
-                {/* Profile Header */}
-                <View style={styles.profileHeader}>
-                    <View style={[styles.avatarCircle, { backgroundColor: primaryColor }]}>
-                        <ThemedText style={{ color: "#000000", fontSize: 32, fontWeight: "bold" }}>
-                            {user?.email ? user.email.charAt(0).toUpperCase() : "U"}
-                        </ThemedText>
-                    </View>
-                    <Spacer height={15} />
-                    <ThemedText style={[styles.userEmail, { color: dynamicPink }]}>{user?.email || "Guest User"}</ThemedText>
-                    <ThemedText style={[styles.userId, { color: dynamicPink }]}>
-                        ID: {user?.$id || "N/A"}
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+                {/* Header */}
+                <View style={styles.headerSection}>
+                    <Pressable onPress={() => router.back()} hitSlop={12} style={styles.backButton}>
+                        <Ionicons name="chevron-back" size={24} color={colors.primary} />
+                    </Pressable>
+                    <ThemedText title={true} style={styles.title}>
+                        {t(language, 'profile_title')}
                     </ThemedText>
+                    <View style={{ width: 24 }} />
                 </View>
 
-                <Spacer height={20} />
+                <Spacer height={24} />
 
-                {/* Account Information Cards */}
-                <ThemedText style={styles.sectionTitle}>Account Details</ThemedText>
+                {/* User Avatar Section */}
+                <View style={styles.avatarSection}>
+                    <View style={[styles.avatarCircle, { backgroundColor: colors.primary + '20' }]}>
+                        <Ionicons name="person" size={48} color={colors.primary} />
+                    </View>
+                    <ThemedText style={styles.userName} title={true}>
+                        {user?.name || 'User'}
+                    </ThemedText>
+                    <Text style={styles.userEmail}>{user?.email || 'No email'}</Text>
+                </View>
 
-                <View style={[styles.infoCard, { backgroundColor: cardBackground }]}>
-                    <View style={styles.infoRow}>
-                        <Ionicons name="calendar" size={20} color={primaryColor} />
-                        <View style={styles.infoContent}>
-                            <ThemedText style={styles.infoLabel}>Member Since</ThemedText>
-                            <ThemedText style={styles.infoValue}>
-                                {user?.$createdAt
-                                    ? new Date(user.$createdAt).toLocaleDateString()
-                                    : "N/A"}
+                <Spacer height={28} />
+
+                {/* Account Information Section */}
+                <View style={styles.sectionContainer}>
+                    <ThemedText style={styles.sectionTitle}>
+                        {t(language, 'profile_account_info')}
+                    </ThemedText>
+                    <Spacer height={12} />
+
+                    <View style={[styles.infoCard, { backgroundColor: theme.unibackground }]}>
+                        <View style={styles.infoRow}>
+                            <View style={styles.infoLeft}>
+                                <Ionicons name="mail-outline" size={18} color={colors.primary} />
+                                <ThemedText style={styles.infoLabel}>
+                                    {t(language, 'profile_email')}
+                                </ThemedText>
+                            </View>
+                            <Text style={styles.infoValue} numberOfLines={1}>
+                                {user?.email || 'N/A'}
+                            </Text>
+                        </View>
+
+                        <View style={styles.divider} />
+
+                        <View style={styles.infoRow}>
+                            <View style={styles.infoLeft}>
+                                <Ionicons name="person-outline" size={18} color={colors.primary} />
+                                <ThemedText style={styles.infoLabel}>
+                                    {t(language, 'profile_name')}
+                                </ThemedText>
+                            </View>
+                            <Text style={styles.infoValue} numberOfLines={1}>
+                                {user?.name || 'Not set'}
+                            </Text>
+                        </View>
+                    </View>
+                </View>
+
+                <Spacer height={28} />
+
+                {/* Language Selection Section */}
+                <View style={styles.sectionContainer}>
+                    <ThemedText style={styles.sectionTitle}>
+                        {t(language, 'profile_language')}
+                    </ThemedText>
+                    <Spacer height={12} />
+
+                    <View style={styles.languageButtonsContainer}>
+                        <Pressable
+                            style={({ pressed }) => [
+                                styles.languageButton,
+                                { backgroundColor: theme.unibackground },
+                                language === 'en' && styles.languageButtonActive,
+                                pressed && styles.languageButtonPressed,
+                            ]}
+                            onPress={() => changeLanguage('en')}
+                        >
+                            {language === 'en' && (
+                                <View style={styles.languageCheckmark}>
+                                    <Ionicons name="checkmark" size={16} color="#fff" />
+                                </View>
+                            )}
+                            <Ionicons
+                                name="globe-outline"
+                                size={24}
+                                color={language === 'en' ? '#fff' : colors.primary}
+                            />
+                            <ThemedText style={[styles.languageName, language === 'en' && styles.languageNameActive]}>
+                                English
                             </ThemedText>
-                        </View>
+                            <Text style={[styles.languageNative, language === 'en' && styles.languageNativeActive]}>
+                                अंग्रेजी
+                            </Text>
+                        </Pressable>
+
+                        <Spacer height={12} />
+
+                        <Pressable
+                            style={({ pressed }) => [
+                                styles.languageButton,
+                                { backgroundColor: theme.unibackground },
+                                language === 'ne' && styles.languageButtonActive,
+                                pressed && styles.languageButtonPressed,
+                            ]}
+                            onPress={() => changeLanguage('ne')}
+                        >
+                            {language === 'ne' && (
+                                <View style={styles.languageCheckmark}>
+                                    <Ionicons name="checkmark" size={16} color="#fff" />
+                                </View>
+                            )}
+                            <Ionicons
+                                name="flag-outline"
+                                size={24}
+                                color={language === 'ne' ? '#fff' : colors.primary}
+                            />
+                            <ThemedText style={[styles.languageName, language === 'ne' && styles.languageNameActive]}>
+                                नेपाली
+                            </ThemedText>
+                            <Text style={[styles.languageNative, language === 'ne' && styles.languageNativeActive]}>
+                                Nepali
+                            </Text>
+                        </Pressable>
                     </View>
                 </View>
 
-                <Spacer height={12} />
+                <Spacer height={28} />
 
-                <View style={[styles.infoCard, { backgroundColor: cardBackground }]}>
-                    <View style={styles.infoRow}>
-                        <Ionicons name="shield-checkmark" size={20} color={primaryColor} />
-                        <View style={styles.infoContent}>
-                            <ThemedText style={styles.infoLabel}>Account Status</ThemedText>
-                            <ThemedText style={styles.infoValue}>Active</ThemedText>
-                        </View>
-                    </View>
-                </View>
-
-                <Spacer height={25} />
-
-                {/* Settings Menu Options */}
-                <ThemedText style={styles.sectionTitle}>Settings</ThemedText>
-
-                <Pressable style={[styles.settingsItem, { backgroundColor: cardBackground }]}>
-                    <Ionicons name="notifications" size={20} color={primaryColor} />
-                    <ThemedText style={styles.settingsText}>Notifications</ThemedText>
-                    <Ionicons name="chevron-forward" size={20} color="#000000" />
+                {/* Logout Button */}
+                <Pressable
+                    style={({ pressed }) => [
+                        styles.logoutButton,
+                        pressed && styles.logoutButtonPressed,
+                    ]}
+                    onPress={handleLogout}
+                >
+                    <Ionicons name="log-out-outline" size={18} color="#fff" />
+                    <ThemedText style={styles.logoutButtonText}>
+                        {t(language, 'profile_logout')}
+                    </ThemedText>
                 </Pressable>
 
-                <Spacer height={12} />
-
-                <Pressable style={[styles.settingsItem, { backgroundColor: cardBackground }]}>
-                    <Ionicons name="settings" size={20} color={primaryColor} />
-                    <ThemedText style={styles.settingsText}>Account Settings</ThemedText>
-                    <Ionicons name="chevron-forward" size={20} color="#000000" />
-                </Pressable>
-
-                <Spacer height={12} />
-
-                <Pressable style={[styles.settingsItem, { backgroundColor: cardBackground }]}>
-                    <Ionicons name="help-circle" size={20} color={primaryColor} />
-                    <ThemedText style={styles.settingsText}>Help & Support</ThemedText>
-                    <Ionicons name="chevron-forward" size={20} color="#010101" />
-                </Pressable>
-
-                <Spacer height={35} />
-
-                {/* Action Logout Button */}
-                <ThemedButton onPress={handleLogout} disabled={loading}>
-                    {loading ? (
-                        <ThemedLoader />
-                    ) : (
-                        <View style={styles.logoutButtonContent}>
-                            <Ionicons name="log-out" size={20} color="#fff" />
-                            <ThemedText style={styles.logoutButtonText}>Logout</ThemedText>
-                        </View>
-                    )}
-                </ThemedButton>
-
-                <Spacer height={25} />
-
-                {/* App Version Identifier */}
-                <Text style={styles.appVersion}>App Version 1.0.0</Text>
-                <Spacer height={40} />
-
+                <Spacer height={30} />
             </ScrollView>
         </ThemedView>
-    );
-};
+    )
+}
 
-export default Profile;
+export default Profile
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingHorizontal: 20,
-        paddingTop: 20,
     },
-    profileHeader: {
-        alignItems: "center",
-        paddingVertical: 20,
+    scrollContent: {
+        paddingHorizontal: 16,
+        paddingTop: 12,
+    },
+    headerSection: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    backButton: {
+        width: 32,
+        height: 32,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: '800',
+        flex: 1,
+        textAlign: 'center',
+    },
+    avatarSection: {
+        alignItems: 'center',
+        gap: 8,
     },
     avatarCircle: {
         width: 80,
         height: 80,
         borderRadius: 40,
-        alignItems: "center",
-        justifyContent: "center",
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 8,
+    },
+    userName: {
+        fontSize: 20,
+        fontWeight: '700',
     },
     userEmail: {
-        fontSize: 20,
-        fontWeight: "bold",
-    },
-    userId: {
-        fontSize: 12,
+        fontSize: 13,
         opacity: 0.6,
-        marginTop: 5,
+    },
+    sectionContainer: {
+        gap: 8,
     },
     sectionTitle: {
-        fontSize: 16,
-        fontWeight: "bold",
-        marginBottom: 12,
-        textTransform: "uppercase",
+        fontSize: 13,
+        fontWeight: '700',
+        textTransform: 'uppercase',
         letterSpacing: 0.5,
+        opacity: 0.6,
     },
     infoCard: {
-        borderRadius: 10,
-        padding: 15,
+        borderRadius: 14,
+        paddingHorizontal: 14,
+        paddingVertical: 12,
     },
     infoRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 15,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: 12,
     },
-    infoContent: {
+    infoLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
         flex: 1,
-        color: "#333",
     },
     infoLabel: {
-        fontSize: 12,
-        color: "#333",
-        marginBottom: 3,
+        fontSize: 14,
+        fontWeight: '600',
     },
     infoValue: {
-        fontSize: 14,
-        fontWeight: "600",
-        color: "#333",
+        fontSize: 13,
+        opacity: 0.6,
+        maxWidth: '50%',
     },
-    settingsItem: {
-        flexDirection: "row",
-        alignItems: "center",
-        paddingVertical: 15,
-        paddingHorizontal: 15,
-        borderRadius: 10,
-        gap: 15,
+    divider: {
+        height: 1,
+        backgroundColor: 'rgba(0,0,0,0.08)',
     },
-    settingsText: {
-        flex: 1,
-        fontSize: 16,
-        fontWeight: "500",
-        color: "#333",
-    },
-    logoutButtonContent: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
+    languageButtonsContainer: {
         gap: 10,
     },
-    logoutButtonText: {
-        color: "#fff",
+    languageButton: {
+        borderRadius: 14,
+        padding: 14,
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 8,
+        position: 'relative',
+    },
+    languageButtonActive: {
+        backgroundColor: colors.primary,
+    },
+    languageButtonPressed: {
+        opacity: 0.75,
+    },
+    languageCheckmark: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        backgroundColor: colors.primary,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    languageName: {
         fontSize: 16,
-        fontWeight: "600",
+        fontWeight: '700',
     },
-    appVersion: {
-        textAlign: "center",
-        fontSize: 12,
-        color: "#333",
+    languageNameActive: {
+        color: '#fff',
     },
-});
+    languageNative: {
+        fontSize: 13,
+        opacity: 0.6,
+    },
+    languageNativeActive: {
+        color: 'rgba(255,255,255,0.8)',
+        opacity: 1,
+    },
+    logoutButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 10,
+        backgroundColor: colors.primary,
+        paddingVertical: 14,
+        borderRadius: 12,
+    },
+    logoutButtonPressed: {
+        opacity: 0.8,
+    },
+    logoutButtonText: {
+        color: '#fff',
+        fontSize: 15,
+        fontWeight: '700',
+    },
+})

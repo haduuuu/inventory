@@ -1,0 +1,242 @@
+// Localization strings for English and Nepali
+export const translations = {
+    en: {
+        // Common
+        app_name: 'Kirana Inventory',
+        close: 'Close',
+        cancel: 'Cancel',
+        delete: 'Delete',
+        save: 'Save',
+        edit: 'Edit',
+        back: 'Back',
+
+        // Home Screen
+        home_greeting_hello: 'Hello',
+        home_greeting_manage: 'Manage your inventory',
+        home_quick_actions: 'Quick Actions',
+        home_all_products: 'All Products',
+        home_all_products_desc: 'items',
+        home_add_product: 'Add Product',
+        home_add_product_desc: 'Create new item',
+        home_stats_total: 'Total Stock',
+        home_stats_low: 'Low Stock',
+        home_stats_expiring: 'Expiring',
+        home_low_stock_alert: 'Low Stock Alert',
+        home_expiring_soon: 'Expiring Soon',
+        home_all_healthy: 'All inventory healthy!',
+        home_start_adding: 'Start by adding your first product',
+        home_login_required: 'Log in to view your inventory',
+        home_view_all: 'View all',
+
+        // Products Screen
+        products_title: 'Products',
+        products_items_in_stock: 'items in stock',
+        products_items_in_category: 'items in this category',
+        products_browse_category: 'Browse by Category',
+        products_no_products: 'No products yet',
+        products_create_first: 'Create your first product to get started',
+        products_no_products_category: 'No products in this category',
+        products_view_all: 'View all products',
+        products_furniture: 'Furniture',
+        products_electronics: 'Electronics',
+        products_apparel: 'Apparel',
+        products_in_stock: 'In stock',
+        products_low_stock: 'Low stock',
+
+        // Create Product Screen
+        create_title: 'Add Product',
+        create_product_name: 'Product Name',
+        create_product_name_hint: 'e.g., Organic Coffee',
+        create_sku_barcode: 'SKU / Barcode',
+        create_sku_hint: 'e.g., FUR-0021',
+        create_price: 'Price (Rs.)',
+        create_price_hint: '0.00',
+        create_stock_quantity: 'Stock Quantity',
+        create_stock_hint: '0',
+        create_category: 'Category',
+        create_select_category: 'Select category',
+        create_submit: 'Create Product',
+        create_cancel_btn: 'Cancel',
+        create_validation_error: 'Please fill in all fields',
+
+        // Edit Product Screen
+        edit_title: 'Edit Product',
+        edit_save: 'Save Changes',
+        edit_delete: 'Delete Product',
+        edit_delete_confirm: 'Are you sure you want to delete',
+        edit_delete_warning: 'This action cannot be undone',
+
+        // Scan Screen
+        scan_title_create: 'Scan Barcode',
+        scan_title_lookup: 'Find Product',
+        scan_center: 'Center barcode in frame',
+        scan_looking_up: 'Looking up product details...',
+        scan_not_found: 'Product not found',
+        scan_not_found_desc: 'Barcode not in your inventory. Create it?',
+        scan_already_in_inventory: 'Already in inventory',
+        scan_already_desc: 'exists. Edit it instead?',
+        scan_create_anyway: 'Create anyway',
+        scan_edit_existing: 'Edit existing',
+        scan_permission: 'Camera Access Needed',
+        scan_permission_desc: 'We need permission to scan barcodes from your device camera.',
+        scan_grant: 'Grant Access',
+
+        // Profile Screen
+        profile_title: 'Profile',
+        profile_account_info: 'Account Information',
+        profile_email: 'Email',
+        profile_name: 'Name',
+        profile_language: 'Language',
+        profile_english: 'English',
+        profile_nepali: 'नेपाली',
+        profile_settings: 'Settings',
+        profile_theme: 'Theme',
+        profile_light: 'Light',
+        profile_dark: 'Dark',
+        profile_logout: 'Log Out',
+        profile_logout_confirm: 'Are you sure you want to log out?',
+
+        // Auth Screens
+        auth_login: 'Log In',
+        auth_email: 'Email',
+        auth_password: 'Password',
+        auth_register: 'Sign Up',
+        auth_no_account: "Don't have an account?",
+        auth_have_account: 'Already have an account?',
+        auth_sign_up_link: 'Sign up here',
+        auth_login_link: 'Log in here',
+        auth_confirm_password: 'Confirm Password',
+        auth_error: 'Login failed. Please try again.',
+
+        // Alerts & Errors
+        error_title: 'Error',
+        error_couldnt_delete: "Couldn't delete product",
+        error_try_again: 'Please try again.',
+        success_created: 'Product created successfully',
+        success_updated: 'Product updated successfully',
+        success_deleted: 'Product deleted successfully',
+    },
+
+    ne: {
+        // Common
+        app_name: 'किराना इन्भेन्टरी',
+        close: 'बन्द गर्नुहोस्',
+        cancel: 'रद्द गर्नुहोस्',
+        delete: 'हटाउनुहोस्',
+        save: 'बचत गर्नुहोस्',
+        edit: 'सम्पादन गर्नुहोस्',
+        back: 'पछाडि',
+
+        // Home Screen
+        home_greeting_hello: 'नमस्ते',
+        home_greeting_manage: 'आफ्नो इन्भेन्टरी व्यवस्थापन गर्नुहोस्',
+        home_quick_actions: 'द्रुत कार्यहरू',
+        home_all_products: 'सबै उत्पादनहरू',
+        home_all_products_desc: 'वस्तुहरू',
+        home_add_product: 'उत्पादन थप्नुहोस्',
+        home_add_product_desc: 'नयाँ उत्पादन सिर्जना गर्नुहोस्',
+        home_stats_total: 'कुल स्टक',
+        home_stats_low: 'कम स्टक',
+        home_stats_expiring: 'म्याद सकिँदै',
+        home_low_stock_alert: 'कम स्टक सतर्कता',
+        home_expiring_soon: 'चाँडै म्याद सक्छ',
+        home_all_healthy: 'सबै इन्भेन्टरी स्वस्थ छ!',
+        home_start_adding: 'आफ्नो पहिलो उत्पादन थप गरेर सुरु गर्नुहोस्',
+        home_login_required: 'आपनो इन्भेन्टरी हेर्न लग इन गर्नुहोस्',
+        home_view_all: 'सबै हेर्नुहोस्',
+
+        // Products Screen
+        products_title: 'उत्पादनहरू',
+        products_items_in_stock: 'स्टकमा उत्पादनहरू',
+        products_items_in_category: 'यस वर्गमा उत्पादनहरू',
+        products_browse_category: 'श्रेणी द्वारा ब्राउज गर्नुहोस्',
+        products_no_products: 'अझै कुनै उत्पदन छैन',
+        products_create_first: 'सुरु गर्नको लागि आफ्नो पहिलो उत्पादन सिर्जना गर्नुहोस्',
+        products_no_products_category: 'यस वर्गमा कुनै उत्पदन छैन',
+        products_view_all: 'सबै उत्पादनहरू हेर्नुहोस्',
+        products_furniture: 'फर्निचर',
+        products_electronics: 'इलेक्ट्रोनिक्स',
+        products_apparel: 'पोशाक',
+        products_in_stock: 'स्टकमा छ',
+        products_low_stock: 'कम स्टक',
+
+        // Create Product Screen
+        create_title: 'उत्पादन थप्नुहोस्',
+        create_product_name: 'उत्पादन नाम',
+        create_product_name_hint: 'जस्तै, जैविक कफी',
+        create_sku_barcode: 'SKU / बारकोड',
+        create_sku_hint: 'जस्तै, FUR-0021',
+        create_price: 'मूल्य (रु.)',
+        create_price_hint: '0.00',
+        create_stock_quantity: 'स्टक मात्रा',
+        create_stock_hint: '0',
+        create_category: 'श्रेणी',
+        create_select_category: 'श्रेणी छान्नुहोस्',
+        create_submit: 'उत्पादन सिर्जना गर्नुहोस्',
+        create_cancel_btn: 'रद्द गर्नुहोस्',
+        create_validation_error: 'कृपया सबै क्षेत्र भर्नुहोस्',
+
+        // Edit Product Screen
+        edit_title: 'उत्पादन सम्पदन गर्नुहोस्',
+        edit_save: 'परिवर्तनहरू बचत गर्नुहोस्',
+        edit_delete: 'उत्पादन हटाउनुहोस्',
+        edit_delete_confirm: 'के तपाई निश्चित हुनुहुन्छ तपाई हटाउन चाहनुहुन्छ',
+        edit_delete_warning: 'यो कार्य पूर्ववत गर्न सकिँदैन',
+
+        // Scan Screen
+        scan_title_create: 'बारकोड स्क्यान गर्नुहोस्',
+        scan_title_lookup: 'उत्पादन खोज्नुहोस्',
+        scan_center: 'बारकोडलाई फ्रेमको केन्द्रमा राख्नुहोस्',
+        scan_looking_up: 'उत्पादन विवरण खोजिँदैछ...',
+        scan_not_found: 'उत्पादन भेटिएन',
+        scan_not_found_desc: 'बारकोड आफ्नो इन्भेन्टरीमा छैन। यो सिर्जना गर्नुहोस्?',
+        scan_already_in_inventory: 'पहिले नै इन्भेन्टरीमा छ',
+        scan_already_desc: 'अवस्थित छ। यसको सट्टा सम्पदन गर्नुहोस्?',
+        scan_create_anyway: 'जे भए पनि सिर्जना गर्नुहोस्',
+        scan_edit_existing: 'अवस्थित सम्पदन गर्नुहोस्',
+        scan_permission: 'क्यामेरा अनुमति आवश्यक छ',
+        scan_permission_desc: 'हामीलाई आपको डिभाइस क्यामेरा देखि बारकोड स्क्यान गर्न अनुमति चाहिन्छ।',
+        scan_grant: 'अनुमति दिनुहोस्',
+
+        // Profile Screen
+        profile_title: 'प्रोफाइल',
+        profile_account_info: 'खाता जानकारी',
+        profile_email: 'ईमेल',
+        profile_name: 'नाम',
+        profile_language: 'भाषा',
+        profile_english: 'English',
+        profile_nepali: 'नेपाली',
+        profile_settings: 'सेटिङ्गहरू',
+        profile_theme: 'थिम',
+        profile_light: 'हल्का',
+        profile_dark: 'अँध्यारो',
+        profile_logout: 'लगआउट गर्नुहोस्',
+        profile_logout_confirm: 'के तपाई निश्चित हुनुहुन्छ तपाई लगआउट गर्न चाहनुहुन्छ?',
+
+        // Auth Screens
+        auth_login: 'लग इन गर्नुहोस्',
+        auth_email: 'ईमेल',
+        auth_password: 'पासवर्ड',
+        auth_register: 'साइन अप गर्नुहोस्',
+        auth_no_account: 'खाता छैन?',
+        auth_have_account: 'पहिले नै खाता छ?',
+        auth_sign_up_link: 'यहाँ साइन अप गर्नुहोस्',
+        auth_login_link: 'यहाँ लग इन गर्नुहोस्',
+        auth_confirm_password: 'पासवर्ड पुष्टि गर्नुहोस्',
+        auth_error: 'लग इन विफल भयो। फेरि प्रयास गर्नुहोस्।',
+
+        // Alerts & Errors
+        error_title: 'त्रुटि',
+        error_couldnt_delete: 'पण्य हटाउन सकिएन',
+        error_try_again: 'कृपया फेरि प्रयास गर्नुहोस्।',
+        success_created: 'पण्य सफलतापूर्वक सिर्जना गरिएको',
+        success_updated: 'पण्य सफलतापूर्वक अपडेट गरिएको',
+        success_deleted: 'पण्य सफलतापूर्वक हटाइएको',
+    }
+};
+
+// Helper function to get translated string
+export const t = (languageCode, key) => {
+    const lang = translations[languageCode] || translations.en;
+    return lang[key] || key; // Fallback to key if translation not found
+};
