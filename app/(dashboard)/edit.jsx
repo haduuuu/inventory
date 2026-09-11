@@ -1,8 +1,8 @@
 import { StyleSheet, View, ScrollView, Text, Pressable, ActivityIndicator, Alert, useColorScheme } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useContext, useState, useEffect, useLayoutEffect } from "react";
-import { useNavigation } from "@react-navigation/native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useNavigation } from "expo-router";
+import { useSafeAreaInsets } from 'expo-router';
 import { Ionicons } from "@expo/vector-icons";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
 import { useLanguage } from "../../contexts/LanguageContext";

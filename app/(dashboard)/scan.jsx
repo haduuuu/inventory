@@ -2,7 +2,7 @@ import { StyleSheet, View, Text, Pressable, Alert, useColorScheme, ActivityIndic
 import React, { useState, useRef, useCallback } from 'react'
 import { CameraView, useCameraPermissions } from 'expo-camera'
 import { useRouter, useLocalSearchParams } from 'expo-router'
-import { useFocusEffect } from '@react-navigation/native'
+import { useFocusEffect } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import ThemedView from '../../components/ThemedView'

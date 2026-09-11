@@ -3,7 +3,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { useState, useEffect, useLayoutEffect } from "react";
 import { useProducts } from "../../hooks/useProducts";
 import { useUser } from "../../hooks/useUser";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
